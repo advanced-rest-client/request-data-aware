@@ -1,0 +1,89 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../iron-test-helpers/test-helpers.js"></script>
+    <script src="../../iron-test-helpers/mock-interactions.js"></script>
+
+    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../request-data-aware.html">
+  </head>
+  <body>
+
+    <test-fixture id="a1">
+      <template>
+        <request-data-aware></request-data-aware>
+      </template>
+    </test-fixture>
+    <test-fixture id="a2">
+      <template>
+        <request-data-aware scope="test"></request-data-aware>
+      </template>
+    </test-fixture>
+    <test-fixture id="a3">
+      <template>
+        <request-data-aware></request-data-aware>
+      </template>
+    </test-fixture>
+    <test-fixture id="a4">
+      <template>
+        <request-data-aware scope="test"></request-data-aware>
+      </template>
+    </test-fixture>
+
+    <script>
+    /* global suite, test, fixture, assert */
+    suite('basic', function() {
+      var a1;
+      var a2;
+      var a3;
+      var a4;
+      setup(function() {
+        a1 = fixture('a1');
+        a2 = fixture('a2');
+        a3 = fixture('a3');
+        a4 = fixture('a4');
+      });
+      teardown(function() {
+        a1.parentNode.removeChild(a1);
+        a2.parentNode.removeChild(a2);
+        a3.parentNode.removeChild(a3);
+        a4.parentNode.removeChild(a4);
+        a1.request = undefined;
+        a2.request = undefined;
+        a3.request = undefined;
+        a4.request = undefined;
+      });
+      test('`request-data-aware` should set object for detault scope', function() {
+        var obj = {'url': 'http://mulesoft.com', 'method': 'GET'};
+        a1.request = obj;
+        assert.deepEqual(a3.request, obj, 'a3.request equals ' + JSON.stringify(obj));
+      });
+      test('`request-data-aware` should set object for test scope', function() {
+        var obj = {'url': 'http://mulesoft.com', 'method': 'GET'};
+        a2.request = obj;
+        assert.deepEqual(a4.request, obj, 'a4.request equals ' + JSON.stringify(obj));
+      });
+      test('`request-data-aware` should not set object for other scopes', function() {
+        var obj = {'url': 'http://mulesoft.com', 'method': 'GET'};
+        a1.request = obj;
+        assert.notDeepEqual(a2.request, obj, 'a2.request not equals ' + JSON.stringify(obj));
+      });
+    });
+    </script>
+
+  </body>
+</html>

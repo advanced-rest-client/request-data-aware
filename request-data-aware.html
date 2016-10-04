@@ -1,0 +1,147 @@
+<!--
+@license
+Copyright 2016 The Advanced REST client authors
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<!--
+`<request-data-aware>` Element that is aware of the RequestObject currently
+loadded into the app.
+
+The element contains the same request object data as other
+`<request-data-aware>` elements whenever their location in the document.
+The request object is encapsulated in the `scope` attribute.
+By default the `scope` is `default`. If you create two `<request-data-aware>`s
+with different scopes then changing one request object will not affect
+the other.
+
+Setting a request data on a `<request-data-aware>` will notify other awares
+with the same scope about the change and update their request data so it can
+be transfered between different parts of application on even different
+web components.
+
+### Example
+```html
+<request-data-aware request="{{request}}" scope="request"></request-data-aware>
+<request-data-aware request="{{importRequest}}" scope="import"></request-data-aware>
+<request-data-aware scope="request" id="receiver"></request-data-aware>
+```
+```javascript
+var a1 = document.querySelector('request-data-aware[scope="request"]');
+var a2 = document.querySelector('request-data-aware[scope="import"]');
+var a3 = document.querySelector('#receiver');
+r1.request = {};
+r2.request = null;
+assert(r1.request !== a2.request);
+assert(r1.request === a3.request);
+```
+
+@group Logic Elements
+@element request-data-aware
+@demo demo/index.html
+-->
+<script>
+(function() {
+'use strict';
+var RequestAware = {
+  defaultScope: 'default',
+  awares: [],
+  /**
+   * Store for request object.
+   * @type {Object<String, Object>} The key is a scope (`default` by default)
+   * and the value is the request object definition for this scope.
+   */
+  request: {},
+  attachRequestAware: function(aware) {
+    if (this.awares.indexOf(aware) === -1) {
+      this.awares.push(aware);
+      this.scopeChanged(aware);
+    }
+  },
+
+  detachRequestAware: function(aware) {
+    var index = this.awares.indexOf(aware);
+    if (index !== -1) {
+      this.awares.splice(index, 1);
+    } else {
+      console.warn('The aware wasn\'t attached!');
+    }
+  },
+  /**
+   * Notifies other awares about the change
+   * @param {HTMLElement} srcAware The aware that notified about the change
+   */
+  setRequest: function(srcAware) {
+    var scope = srcAware.scope || this.defaultScope;
+    var request = srcAware.request || undefined;
+    this.request[scope] = request;
+    this.awares.forEach((aware) => {
+      if (aware === srcAware) {
+        return;
+      }
+      let localScope = aware.scope || this.defaultScope;
+      if (localScope !== scope) {
+        return;
+      }
+      aware.request = request;
+    });
+  },
+
+  scopeChanged: function(aware) {
+    var scope = aware.scope || this.defaultScope;
+    aware.request = this.request[scope];
+  }
+};
+
+Polymer({
+  is: 'request-data-aware',
+  properties: {
+    /**
+     * Scope for the request data.
+     * Different awares may have different scope and keep different request
+     * objects.
+     * It can be useful when one aware supports request panel and another
+     * other operation that require the request object: import for example.
+     * In this case first one may have scope not set
+     * (`default` scope) and second one `import` scope. Then both request
+     * objects are encapsulated to the scope.
+     */
+    scope: String,
+    // The request object.
+    request: {
+      type: Object,
+      notify: true
+    }
+  },
+
+  observers: [
+    '_scopeChanged(scope)',
+    '_requestChanged(request.*)',
+  ],
+
+  attached: function() {
+    RequestAware.attachRequestAware(this);
+  },
+
+  detached: function() {
+    RequestAware.detachRequestAware(this);
+  },
+  // Update request object for selected scope.
+  _scopeChanged(scope) {
+    RequestAware.scopeChanged(this);
+  },
+  // Notifies other awares about request object change.
+  _requestChanged: function() {
+    RequestAware.setRequest(this);
+  }
+});
+})();
+</script>

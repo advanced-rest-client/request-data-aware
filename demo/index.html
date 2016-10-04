@@ -1,0 +1,73 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+  <title>request-data-aware demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+  <link rel="import" href="../request-data-aware.html">
+
+  <style is="custom-style" include="demo-pages-shared-styles">
+
+    .vertical-section-container {
+      max-width: 600px;
+    }
+
+  </style>
+</head>
+<body unresolved>
+  <div class="vertical-section-container centered">
+    <h3>The `request-data-aware`</h3>
+    <demo-snippet>
+      <template>
+        <request-data-aware id="a1"></request-data-aware>
+        <request-data-aware id="a2" scope="demo"></request-data-aware>
+        <request-data-aware id="a3"></request-data-aware>
+        <request-data-aware id="a4" scope="demo"></request-data-aware>
+        <code></code>
+        <script>
+          var awares = ['a1','a2','a3','a4'].map((id) =>
+            document.querySelector('#' + id));
+          var output = document.querySelector('code');
+          var r1 = {
+            'url': 'https://www.mulesoft.com',
+            'method': 'GET'
+          };
+          var r2 = {
+            'url': 'https://www.google.com',
+            'method': 'GET'
+          };
+          awares[0].request = r1;
+          awares[1].request = r2;
+
+          var txt = 'a1.request = ' +
+            JSON.stringify(awares[0].request) + '\n';
+          txt += 'a2.request = ' +
+            JSON.stringify(awares[1].request) + '\n';
+          txt += 'a3.request = ' +
+            JSON.stringify(awares[2].request) + '\n';
+          txt += 'a4.request = ' +
+            JSON.stringify(awares[3].request) + '\n';
+          output.innerText = txt;
+        </script>
+      </template>
+    </demo-snippet>
+  </div>
+</body>
+</html>
